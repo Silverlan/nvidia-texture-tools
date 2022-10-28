@@ -12,7 +12,7 @@
 #if HAVE_RGETC
 #include "rg_etc1.h"
 #endif
-
+#ifndef __linux__
 #if HAVE_ETCPACK
 // From etcpack.cxx
 extern void decompressBlockETC2(unsigned int block_part1, unsigned int block_part2, uint8 *img, int width, int height, int startx, int starty);
@@ -2130,13 +2130,14 @@ float compress_eac_range_search(Vector4 input_colors[16], float input_weights[16
 
     return best.error;
 }
-
+#endif
 
 
 
 // Public API:
 
 void nv::decompress_etc(const void * input_block, Vector4 output_colors[16]) {
+#ifndef __linux__
 #if 1 // Our code
     ETC_Data data;
     unpack_etc2_block((const BlockETC *)input_block, &data);
@@ -2170,9 +2171,11 @@ void nv::decompress_etc(const void * input_block, Vector4 output_colors[16]) {
         output_colors[i].w = 1.0f;
     }
 #endif
+#endif
 }
 
 void nv::decompress_eac(const void * input_block, Vector4 output_colors[16], int output_channel) {
+#ifndef __linux__
     nvCheck(output_channel >= 0 && output_channel < 4);
     
 #if 1
@@ -2192,9 +2195,11 @@ void nv::decompress_eac(const void * input_block, Vector4 output_colors[16], int
         output_colors[i].component[output_channel] = alpha * (1.0f / 65535.0f);
     }
 #endif
+#endif
 }
 
 void nv::decompress_etc_eac(const void * input, Vector4 output_colors[16]) {
+#ifndef __linux__
 #if 1
     BlockETC_EAC * input_block = (BlockETC_EAC *)input;
 
@@ -2218,9 +2223,11 @@ void nv::decompress_etc_eac(const void * input, Vector4 output_colors[16]) {
         output_colors[i].w = colors[4*i+3] * (1.0f / 255.0f);
     }
 #endif
+#endif
 }
 
 float nv::compress_etc1(Vector4 input_colors[16], float input_weights[16], const Vector3 & color_weights, void * output) {
+#ifndef __linux__
     
     process_input_colors(input_colors);
     
@@ -2234,10 +2241,13 @@ float nv::compress_etc1(Vector4 input_colors[16], float input_weights[16], const
     options.color_weights = color_weights;
 
     return compress_etc(input_colors, input_weights, options, output);
+#else
+	return 0.f;
+#endif
 }
 
 float nv::compress_etc2(Vector4 input_colors[16], float input_weights[16], const Vector3 & color_weights, void * output) {
-    
+#ifndef __linux__
     process_input_colors(input_colors);
     process_input_weights(input_weights);
     
@@ -2250,10 +2260,13 @@ float nv::compress_etc2(Vector4 input_colors[16], float input_weights[16], const
     options.color_weights = color_weights;
 
     return compress_etc(input_colors, input_weights, options, output);
+#else
+	return 0.f;
+#endif
 }
 
 float nv::compress_etc2_a1(Vector4 input_colors[16], float input_weights[16], const Vector3 & color_weights, void * output) {
-    
+#ifndef __linux__
     process_input_colors(input_colors);
     process_input_weights(input_weights);
     
@@ -2267,10 +2280,14 @@ float nv::compress_etc2_a1(Vector4 input_colors[16], float input_weights[16], co
     options.color_weights = color_weights;
     
     return compress_etc_a1(input_colors, input_weights, options, output);
+#else
+	return 0.f;
+#endif
 }
 
 
 float nv::compress_eac(Vector4 input_colors[16], float input_weights[16], int input_channel, int search_radius, bool use_11bit_mode, void * output) {
+#ifndef __linux__
     nvCheck(input_channel >= 0 && input_channel < 4);
     
     process_input_alphas(input_colors, input_channel);
@@ -2281,13 +2298,20 @@ float nv::compress_eac(Vector4 input_colors[16], float input_weights[16], int in
     options.use_11bit_mode = use_11bit_mode;
     
     return compress_eac_range_search(input_colors, input_weights, input_channel, options, output);
+#else
+	return 0.f;
+#endif
 }
 
 float nv::compress_etc2_eac(Vector4 input_colors[16], float input_weights[16], const Vector3 & color_weights, void * output) {
+#ifndef __linux__
     BlockETC_EAC * output_block = (BlockETC_EAC *)output;
     float error = compress_etc2(input_colors, input_weights, color_weights, &output_block->etc);
     error += compress_eac(input_colors, input_weights, /*input_channel=*/3, /*search_radius=*/1, /*use_11bit_mode=*/false, &output_block->eac);
     return error;
+#else
+	return 0.f;
+#endif
 }
 
 
