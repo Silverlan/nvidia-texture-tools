@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10...4.2.0)
 
 add_library(CMP_Core STATIC "")
 
